@@ -1,0 +1,26 @@
+{
+    "server": {
+        "ip": "127.0.0.1",
+        "port": 65201,
+        "type": "multi_threaded"
+    },
+
+    "workloads": [
+        {  
+            "id": "mt_1",
+            "request_rate": 1000,
+            "rw_ratio": 0.9,
+            "duration": 300,
+            "data_size": 1000,
+            "keys_file": "../data/keys_9000.txt"
+        },
+        {
+            "id": 2,
+            "request_rate": 2,
+            "rw_ratio": 0.1,
+            "duration": 10,
+            "data_size": 100,
+            "keys_file": "../data/keys_30.txt"
+        }
+    ]
+}
