@@ -1,0 +1,12 @@
+Txn_BEGIN
+OP.MERGE(('sstable_1542572413.3956912', [(1, <__main__.LsmNode object at 0x7f780b516ef0>), (2, <__main__.LsmNode object at 0x7f780b4ab5f8>), (3, <__main__.LsmNode object at 0x7f780b516f98>)]),)
+Txn_BEGIN
+OP.MERGE(('sstable_1542573031.8934903', [(1, <__main__.LsmNode object at 0x7f348dd62b38>), (2, <__main__.LsmNode object at 0x7f348dd62588>), (3, <__main__.LsmNode object at 0x7f348dd62be0>)]),)
+Txn_BEGIN
+OP.MERGE(('sstable_1542574721.8626323', [(1, <lsm_node.LsmNode object at 0x7fc30d5f4c18>), (2, <lsm_node.LsmNode object at 0x7fc30d5f45f8>), (3, <lsm_node.LsmNode object at 0x7fc30d5f4588>)]),)
+Txn_BEGIN
+OP.MERGE(('sstable_1542574746.8244426', [(1, <lsm_node.LsmNode object at 0x7f4b71465ef0>), (2, <lsm_node.LsmNode object at 0x7f4b71465f98>), (3, <lsm_node.LsmNode object at 0x7f4b71465f28>)]),)
+Txn_END
+Txn_BEGIN
+OP.MERGE(('sstable_1542574746.8250003', [(2, <lsm_node.LsmNode object at 0x7f4b71419ba8>), (4, <lsm_node.LsmNode object at 0x7f4b71419be0>)]),)
+Txn_END

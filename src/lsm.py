@@ -1,42 +1,51 @@
 import time
-import logging
 from enum import Enum
+import utils
+from utils import binary_search
+from lsm_node import LsmNode
+from wal import WAL
+from C1 import C1
 
 class OP(Enum):
     WRITE = 1
     MERGE = 2
-
-class LsmNode:
-    def __init__(self, key, value, tombstone=False):
-        self.key = key
-        self.value = value
-        self.timestamp = time.time()
-        self.tombstone = tombstone
-
+"""
 class C1:
     def __init__(self, db_name):
-        self.c1_fd = open(db_name, 'a')
-        self.name = db_name
+        self.c1_file = db_name
+        self.fd = None
 
     def get(self, key):
-        pass
+        self._gen_fd()
+        c1 = self._load()
+        self._close()
+        keys = [int(x[0]) for x in c1]
+        pos = binary_search(keys, int(key))
+        if pos:
+            elm = c1[pos]
+            if bool(elm[3]):
+                return None
+            return elm[1]
+        return None
 
-class WAL:
-    def __init__(self, logfile):
-        self.logger = logging.getLogger("lsm.LsmTree")
-        self.fh = logging.FileHandler(logfile)
-        self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(self.fh)
+    def merge(self, memtbl):
+        self._gen_fd()
+        c1 = self._load()
 
-    def txn(self, end=False):
-        if end is False:
-            self.logger.info("Txn_BEGIN")
-        else:
-            self.logger.info("Txn_END")
 
-    def log(self, op, *args):
-        msg = str(op)+str(args)
-        self.logger.info(msg)
+    def _get_fd(self, mode='r'):
+        self.fd = open(self.c1_file, mode)
+
+    def _close(self):
+        if self.fd:
+            self.fd.close()
+    
+    def _load(self):
+        c1 = []
+        for line in self.fd.readlines():
+            c1.append(line.strip('\n').split(','))
+        return c1
+"""
 
 class LsmTree:
     def __init__(self, limit, db_name, logfile):
@@ -61,15 +70,19 @@ class LsmTree:
             self.memtable[key] = node
         else:
             self.__add(key, value)
+        return True
 
     def insert(self, key, value):
         self.put(key, value)
+        return True
 
     def delete(self, key):
         self.__add(key, None, tombstone=True)
+        return True
             
     def writeback(self, key, value):
         self.__add(key, value)
+        return True
 
     def __is_full(self):
         return (self.size >= self.limit)
@@ -93,14 +106,17 @@ class LsmTree:
         # Write to log
         log_args = (sst_name, self.buffer)
         self.wal.txn()
-        self.wal.log(OP.WRITE, log_args)
+        self.wal.log(OP.MERGE, log_args)
         # Flush to SS Table
-        #self.c1.merge(self.buffer)
+        c0_list = [v for k,v in self.buffer]
+        self.c1.merge(c0_list)
+        """
         with open(sst_name, 'w') as f:
             for key, elem in self.buffer:
                 line = ",".join([str(key), str(elem.value), \
                                  str(elem.timestamp), str(elem.tombstone)])
                 f.write(line+"\n")
+        """
         self.wal.txn(end=True)
 
     def show(self):
