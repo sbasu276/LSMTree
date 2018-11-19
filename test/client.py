@@ -12,7 +12,7 @@ class Client:
     def send_data(self, message):
         self.sock.send(message)
         data = self.sock.recv(1024)
-        print(data.decode('utf-8'))
+        #print(data.decode('utf-8'))
 
 if __name__ == "__main__":
     # Connect the socket to the port where the server is listening

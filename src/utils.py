@@ -12,9 +12,9 @@ def binary_search(a, x, lo=0, hi=None):
     return (pos if pos != hi and a[pos] == x else -1)  
 
 def parse_req(request):
-    print("UTIL ", request)
+    #print("UTIL ", request)
     req = request.strip('\n').split()
-    print(req)
+    #print(req)
     request = None
     if len(req)>2:
         request = Request(req[0], req[1], req[2])
@@ -27,6 +27,12 @@ def add_response(mapper, sock, response):
         data = mapper[sock]
         data.resp = response
         mapper[sock] = data
+
+
+#Note: the methods in  utils.py uses the storage object names as cache and persistent. 
+#All methods are generic and works for both Naive and LSM. 
+#This is just to clarify that for LSM implementation the object name persistent might a bit confusing. 
+#A name such as second_level_storage might have been more appropriate.
 
 def get(key, cache, persistent, lock):
     lock.acquire()

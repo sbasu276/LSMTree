@@ -12,63 +12,51 @@ import threading
 from client import Client
 
 def rand_val(size):
-    return ''.join(random.choices(string.ascii_lowercase+string.digits, k=size))
+    return ''.join(random.choices(string.ascii_lowercase, k=size))
 
 def gen_get(key):
-    return 'GET '+str(key)
+    return 'GET '+str(key)+'\n'
 
 def gen_put(key):
-    val = rand_val(len(key))
-    return 'PUT '+str(key)+' '+val
+    val = rand_val(500)
+    return 'PUT '+str(key)+' '+val+'\n'
 
-def get_keys(fname):
-    keys = []
-    with open(fname, 'r') as f:
-        for line in f.readlines():
-            keys.append(line.strip('\n'))
-    selected_keys = []
-    size = math.ceil(len(keys)*0.1)
-    samp = random.sample(range(len(keys)), size)
-    for i in samp:
-        selected_keys.append(keys[i])
-    for v in selected_keys:
-        keys.remove(v)
-    return selected_keys, keys
+def get_keys():
+    size = 1000
+    selected_keys = [v for v in range(size)]
+    rem_keys = [v for v in range(size, 10000)]
+    return selected_keys, rem_keys
 
 def make_request_streams(rr, rw, size, keys, rem_keys):
     r_ratio = rw
     w_ratio = 1 - r_ratio
     tot_reqs = 10*rr
     num_clients = math.ceil(rr/2)
-    streams = []
-    for c in range(num_clients):
-        stream = []
-        for i in range(math.ceil(tot_reqs/num_clients)):
-            if random.random() <= 0.9:
-                arr = keys
-            else:
-                arr = rem_keys
-            index = random.randint(0, len(keys)-1)
-            if random.random()<=r_ratio:
-                stream.append(gen_get(arr[index]))
-            else:
-                stream.append(gen_put(arr[index]))
-        streams.append(stream)
-    return streams, num_clients
+    stream = []
+    key = None
+    for c in range(tot_reqs):
+        if random.random() <= 0.9:
+            key = random.randint(0,999)
+        else:
+            key = random.randint(1000, 9999)
+        if random.random()<=r_ratio:
+            stream.append(gen_get(key))
+        else:
+            stream.append(gen_put(key))
+    return stream
 
-size = [100, 1000, 10000]
-rates = [60, 300, 600]
-ratio = [0.9, 0.5, 0.1]
-keysf = ['../data/k_50.txt', '../data/k_500.txt', '../data/k_5000.txt']
-p = ['mt', 'ep']
-for pr in p:
-    for s in size:
-        keys, rem_keys = get_keys(keysf[size.index(s)])
-        for rate in rates:
-            for rw in ratio:
-                out = '../data/tbs/%s_%s_%s_%s'%(pr, rw, rate, s)
-                out_f = '../data/res/%s_%s_%s_%s'%(pr, rw, rate, s)
-                streams, n = make_request_streams(rate, rw, s, keys, rem_keys)
-                p_args = [[[h, p, out_f], stream] for stream in streams] 
-                pool()
-                print("DONE %s"%out)
+h = "127.0.0.1"
+p = "65210"
+size = [500]
+rates = [600]
+ratio = [0.9, 0.1]
+for s in size:
+    keys, rem_keys = get_keys()
+    for rate in rates:
+        for rw in ratio:
+            out = '../data/tbs/%s'%(rw)
+            streams = make_request_streams(rate, rw, s, keys, rem_keys)
+            with open(out, "w") as f:
+                for s in streams:
+                    f.write(s)
+            print("DONE %s"%out)

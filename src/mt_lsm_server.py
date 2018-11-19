@@ -27,15 +27,12 @@ class MultiThreadedLsmServer(object):
     def thread_handler(self, client_sock, address):
         size = 1024
         data = ""
-        print("in handler")
         transfer = client_sock.recv(size)
         data = data + transfer.decode('utf-8')
-        print("DATA ", data)
         req = parse_req(data)
-        print("PARSE")
         resp = call_api(req, self.cache, self.lsmtree, self.lock)
         client_sock.send(resp.encode('utf-8'))
-        self.cache.show()
+        #self.cache.show()
         client_sock.close()
 
 if __name__ == "__main__":
