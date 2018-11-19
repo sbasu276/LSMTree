@@ -100,8 +100,8 @@ class C1:
 		for line in c1_fd:
 			#print('Writing '+line)
 			old_entry = LsmNode(line.split(' ')[0], line.split(' ')[1])
-			entries.append(new_entry)
-			enries = self.__flush_and_update_itable(swap_fd, entries)
+			entries.append(old_entry)
+			entries = self.__flush_and_update_itable(swap_fd, entries)
 	
 		while(i < len(c0_list)):
 			new_entry = c0_list[i]
@@ -144,8 +144,8 @@ if __name__ == "__main__":
 	c0_list.append(LsmNode('Aman', 'Jain')) #inserting a new entry in the middle
 	c0_list.append(LsmNode('Novak', 'Dvic', True)) #deleting a non-existent key
 	c0_list.append(LsmNode('Tonia', 'Jain', True))	#deleting an existing entry
-	c0_list.append(LsmNode('Warren', 'Jain', False)) #Updating an entry
-	c0_list.append(LsmNode('Zzaid', 'Moph', False)) #Adding an entry at the end of file
+#	c0_list.append(LsmNode('Warren', 'Jain', False)) #Updating an entry
+#	c0_list.append(LsmNode('Zzaid', 'Moph', False)) #Adding an entry at the end of file
 	c1.merge(c0_list, False)
 
 	print(c1.index_table)
