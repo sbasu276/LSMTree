@@ -1,4 +1,4 @@
-class Element:
+class CacheElement:
     def __init__(self, key, value, dirty=False):
         self.key = key
         self.value = value
@@ -99,7 +99,7 @@ class Cache:
         """ Private method: Inserts a value in the given position
             By default inserts at the beginning (LRU)
         """
-        elem = Element(key, value, dirty=dirty)
+        elem = CacheElement(key, value, dirty=dirty)
         self.cache.insert(position, elem)
         self.size = self.size+1
 
