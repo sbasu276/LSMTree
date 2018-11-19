@@ -22,7 +22,7 @@ if __name__ == "__main__":
     # Connect the socket to the port where the server is listening
     host = sys.argv[1]
     port = int(sys.argv[2])
-    msg = sys.argv[2]
+    msg = str(sys.argv[3])
     server_address = ('localhost', port)
 
     client = Client(server_address, port)
@@ -30,6 +30,6 @@ if __name__ == "__main__":
     #client.send_data("GET Rafael\n".encode('utf-8'))
     #client.send_data("DELETE Soumen\n".encode('utf-8'))
     #client.send_data("INSERT A 1\n".encode('utf-8'))
-    #client.send_data("PUT A 3\n".encode('utf-8'))
+    #client.send_data("PUT 1 3\n".encode('utf-8'))
     #client.send_data("PUT B 2\n".encode('utf-8'))
 

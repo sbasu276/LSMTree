@@ -36,7 +36,7 @@ def get(key, cache, persistent, lock):
         val = persistent.get(key)
         if val:
             lock.acquire()
-            retkey, retval = cache.insert(key, val, dirty=False)
+            retkey, retval, _ = cache.insert(key, val, dirty=False)
             lock.release()
             if retkey and retval:
                 persistent.writeback(retkey, retval)
@@ -52,20 +52,20 @@ def put(key, value, cache, persistent, lock):
     if retval is None:
         if persistent.put(key, value):
             lock.acquire()
-            retkey, retval = cache.insert(key, value, dirty=False)
+            print(key, value)
+            retkey, retval, _ = cache.insert(key, value, dirty=False)
             lock.release()
             if retkey and retval:
                 persistent.writeback(retkey, retval)
             return "ACK"
         else:
-
             return "-1"
     return "ACK"
 
 def insert(key, value, cache, persistent, lock):
     if persistent.insert(key, value):
         lock.acquire()
-        retkey, retval = cache.insert(key, value)
+        retkey, retval, _ = cache.insert(key, value)
         lock.release()
         if retkey and retval:
             persistent.writeback(retkey, retval)

@@ -4,59 +4,23 @@ import utils
 from utils import binary_search
 from lsm_node import LsmNode
 from wal import WAL
-from C1 import C1
+from c1 import C1
 
 class OP(Enum):
     WRITE = 1
     MERGE = 2
-"""
-class C1:
-    def __init__(self, db_name):
-        self.c1_file = db_name
-        self.fd = None
-
-    def get(self, key):
-        self._gen_fd()
-        c1 = self._load()
-        self._close()
-        keys = [int(x[0]) for x in c1]
-        pos = binary_search(keys, int(key))
-        if pos:
-            elm = c1[pos]
-            if bool(elm[3]):
-                return None
-            return elm[1]
-        return None
-
-    def merge(self, memtbl):
-        self._gen_fd()
-        c1 = self._load()
-
-
-    def _get_fd(self, mode='r'):
-        self.fd = open(self.c1_file, mode)
-
-    def _close(self):
-        if self.fd:
-            self.fd.close()
-    
-    def _load(self):
-        c1 = []
-        for line in self.fd.readlines():
-            c1.append(line.strip('\n').split(','))
-        return c1
-"""
 
 class LsmTree:
-    def __init__(self, limit, db_name, logfile):
+    def __init__(self, limit, db_name):
         self.memtable = {} # Memtable
         self.c1 = C1(db_name) # c1 class obj
         self.limit = limit # Memtable limit
         self.size = 0
         self.buffer = []
-        self.wal = WAL(logfile) # write-ahead log
+        self.wal = WAL(db_name+"_log.log") # write-ahead log
 
     def get(self, key):
+        key = int(key)
         if key in self.memtable:
             if self.memtable[key].tombstone:
                 return None
@@ -65,6 +29,7 @@ class LsmTree:
     
     def put(self, key, value):
         #Dedup keys here
+        key = int(key)
         if key in self.memtable:
             node = LsmNode(key, value, tombstone=False)
             self.memtable[key] = node
@@ -88,35 +53,26 @@ class LsmTree:
         return (self.size >= self.limit)
 
     def __add(self, key, value, tombstone=False):
-        node = LsmNode(key, value, tombstone=tombstone) 
-        self.memtable[key] = node
+        node = LsmNode(int(key), value, tombstone=tombstone) 
+        self.memtable[int(key)] = node
         self.size = self.size + 1
         if self.__is_full():
             self.__flush()
 
     def __flush(self):
-        self.buffer = [(k, v) for k, v in self.memtable.items()]
+        self.buffer = [(int(k), v) for k, v in self.memtable.items()]
         self.memtable = {}
         self.size = 0
         self.buffer.sort(key=lambda x: int(x[0]))
         self._flush()
 
     def _flush(self):
-        sst_name = "sstable_%s"%str(time.time())
         # Write to log
-        log_args = (sst_name, self.buffer)
+        c0_list = [[int(v.key), v.value, v.timestamp, v.tombstone] for k,v in self.buffer]
         self.wal.txn()
-        self.wal.log(OP.MERGE, log_args)
+        self.wal.log(OP.MERGE, c0_list)
         # Flush to SS Table
-        c0_list = [v for k,v in self.buffer]
         self.c1.merge(c0_list)
-        """
-        with open(sst_name, 'w') as f:
-            for key, elem in self.buffer:
-                line = ",".join([str(key), str(elem.value), \
-                                 str(elem.timestamp), str(elem.tombstone)])
-                f.write(line+"\n")
-        """
         self.wal.txn(end=True)
 
     def show(self):
@@ -133,7 +89,7 @@ class LsmTree:
 
 #Unit test here
 if __name__ == "__main__":
-    l = LsmTree(3, 'c1_test', 'test_log.log')
+    l = LsmTree(3, '0_t', 'test_log.log')
     l.put(2, 10)
     l.put(3, 11)
     l.put(2, 15)
